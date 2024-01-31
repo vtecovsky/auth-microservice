@@ -1,6 +1,6 @@
 from typing import TypeVar, Type
 from pydantic import BaseModel as PydanticModel
-from sqlalchemy import insert, and_, select, ColumnElement, inspect
+from sqlalchemy import insert, and_, select, ColumnElement, inspect, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.storage.sql.models import Base
@@ -28,4 +28,10 @@ class CRUD:
     async def read(self, session: AsyncSession, **columns):
         query = select(self._Model).where(*[getattr(self._Model, column) == value for column, value in columns.items()])
         obj = await session.scalar(query)
+        return self._ViewScheme.from_orm(obj) if obj else None
+
+    async def update(self, session: AsyncSession, **data):
+        q = update(self._Model).values(**data).returning(self._Model)
+        obj = await session.scalar(q)
+        await session.commit()
         return self._ViewScheme.from_orm(obj) if obj else None

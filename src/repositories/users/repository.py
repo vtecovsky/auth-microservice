@@ -33,3 +33,7 @@ class SqlUserRepository(AbstractUserRepository):
     async def read(self, **params) -> ViewUser:
         async with self._create_session() as session:
             return await crud.read(session, **params)
+
+    async def update(self, **params) -> ViewUser:
+        async with self._create_session() as session:
+            return await crud.update(session, **params)

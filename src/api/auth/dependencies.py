@@ -7,6 +7,7 @@ from jwt.exceptions import InvalidTokenError
 
 from src.api.auth.utils import validate_password, decode_jwt
 from src.api.dependencies import Dependencies
+from src.exceptions import UnauthorizedException
 from src.repositories.users.abc import AbstractUserRepository
 from src.schemas.users import ViewUser
 
@@ -14,7 +15,7 @@ bearer_scheme = HTTPBearer(
     scheme_name="Bearer",
     description="Your JSON Web Token (JWT)",
     bearerFormat="JWT",
-    auto_error=True,
+    auto_error=False,
 )
 
 
@@ -45,13 +46,11 @@ async def validate_auth_user(
         email: str = Form(),
         password: str = Form()
 ):
-    unauthorized_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                           detail="Invalid username or password")
     user_repository = Dependencies.get(AbstractUserRepository)
     if not (user := await user_repository.read(email=email)):
-        raise unauthorized_exception
+        raise UnauthorizedException()
 
     if validate_password(password, user.password):
         return user
 
-    raise unauthorized_exception
+    raise UnauthorizedException()

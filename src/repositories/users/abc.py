@@ -11,3 +11,7 @@ class AbstractUserRepository(ABC):
     @abstractmethod
     async def read(self, **params) -> ViewUser:
         ...
+
+    @abstractmethod
+    async def update(self, **params) -> ViewUser:
+        ...
